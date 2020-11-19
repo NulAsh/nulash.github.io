@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>passgen2</title>
+    <script type="text/javascript"><!--//--><![CDATA[//><!--
+var a=void 0;function q(b){for(var b=b.replace(/\r\n/g,"\n"),c="",f=0;f<b.length;f++){var e=b.charCodeAt(f);128>e?c+=String.fromCharCode(e):(127<e&&2048>e?c+=String.fromCharCode(e>>6|192):(c+=String.fromCharCode(e>>12|224),c+=String.fromCharCode(e>>6&63|128)),c+=String.fromCharCode(e&63|128))}return c}function s(b,c){this.a=b;this.b=c}function y(b){var c=[],f=8*b.length,e;for(e=0;e<f;e+=8)c[e>>5]|=(b.charCodeAt(e/8)&255)<<24-e%32;return c}
+function z(b,c){return 32>=c?new s(b.a>>>c|b.b<<32-c,b.b>>>c|b.a<<32-c):new s(b.b>>>c|b.a<<32-c,b.a>>>c|b.b<<32-c)}function A(b,c){return 32>=c?new s(b.a>>>c,b.b>>>c|b.a<<32-c):new s(0,b.a<<32-c)}function B(b,c){var f,e,n;f=(b.b&65535)+(c.b&65535);e=(b.b>>>16)+(c.b>>>16)+(f>>>16);n=(e&65535)<<16|f&65535;f=(b.a&65535)+(c.a&65535)+(e>>>16);e=(b.a>>>16)+(c.a>>>16)+(f>>>16);return new s((e&65535)<<16|f&65535,n)}
+function C(b,c){var f,e,n,g,j,l,u,t,k,i,d,v,o,D,w=[],E;D=[new s(1116352408,3609767458),new s(1899447441,602891725),new s(3049323471,3964484399),new s(3921009573,2173295548),new s(961987163,4081628472),new s(1508970993,3053834265),new s(2453635748,2937671579),new s(2870763221,3664609560),new s(3624381080,2734883394),new s(310598401,1164996542),new s(607225278,1323610764),new s(1426881987,3590304994),new s(1925078388,4068182383),new s(2162078206,991336113),new s(2614888103,633803317),new s(3248222580,
+3479774868),new s(3835390401,2666613458),new s(4022224774,944711139),new s(264347078,2341262773),new s(604807628,2007800933),new s(770255983,1495990901),new s(1249150122,1856431235),new s(1555081692,3175218132),new s(1996064986,2198950837),new s(2554220882,3999719339),new s(2821834349,766784016),new s(2952996808,2566594879),new s(3210313671,3203337956),new s(3336571891,1034457026),new s(3584528711,2466948901),new s(113926993,3758326383),new s(338241895,168717936),new s(666307205,1188179964),new s(773529912,
+1546045734),new s(1294757372,1522805485),new s(1396182291,2643833823),new s(1695183700,2343527390),new s(1986661051,1014477480),new s(2177026350,1206759142),new s(2456956037,344077627),new s(2730485921,1290863460),new s(2820302411,3158454273),new s(3259730800,3505952657),new s(3345764771,106217008),new s(3516065817,3606008344),new s(3600352804,1432725776),new s(4094571909,1467031594),new s(275423344,851169720),new s(430227734,3100823752),new s(506948616,1363258195),new s(659060556,3750685593),new s(883997877,
+3785050280),new s(958139571,3318307427),new s(1322822218,3812723403),new s(1537002063,2003034995),new s(1747873779,3602036899),new s(1955562222,1575990012),new s(2024104815,1125592928),new s(2227730452,2716904306),new s(2361852424,442776044),new s(2428436474,593698344),new s(2756734187,3733110249),new s(3204031479,2999351573),new s(3329325298,3815920427),new s(3391569614,3928383900),new s(3515267271,566280711),new s(3940187606,3454069534),new s(4118630271,4000239992),new s(116418474,1914138554),new s(174292421,
+2731055270),new s(289380356,3203993006),new s(460393269,320620315),new s(685471733,587496836),new s(852142971,1086792851),new s(1017036298,365543100),new s(1126000580,2618297676),new s(1288033470,3409855158),new s(1501505948,4234509866),new s(1607167915,987167468),new s(1816402316,1246189591)];d=[new s(1779033703,4089235720),new s(3144134277,2227873595),new s(1013904242,4271175723),new s(2773480762,1595750129),new s(1359893119,2917565137),new s(2600822924,725511199),new s(528734635,4215389547),new s(1541459225,
+327033209)];b[c>>5]|=128<<24-c%32;b[(c+128>>10<<5)+31]=c;E=b.length;for(v=0;v<E;v+=32){f=d[0];e=d[1];n=d[2];g=d[3];j=d[4];l=d[5];u=d[6];t=d[7];for(o=0;80>o;o+=1){if(16>o)k=new s(b[2*o+v],b[2*o+v+1]);else{var h=w[o-2];k=z(h,19);i=z(h,61);h=A(h,6);k=new s(k.a^i.a^h.a,k.b^i.b^h.b);var m=w[o-15];i=z(m,1);h=z(m,8);m=A(m,7);i=new s(i.a^h.a^m.a,i.b^h.b^m.b);var h=w[o-7],m=w[o-16],p=a,r=a,x=a,p=(k.b&65535)+(h.b&65535)+(i.b&65535)+(m.b&65535),r=(k.b>>>16)+(h.b>>>16)+(i.b>>>16)+(m.b>>>16)+(p>>>16),x=(r&65535)<<
+16|p&65535,p=(k.a&65535)+(h.a&65535)+(i.a&65535)+(m.a&65535)+(r>>>16),r=(k.a>>>16)+(h.a>>>16)+(i.a>>>16)+(m.a>>>16)+(p>>>16);k=new s((r&65535)<<16|p&65535,x)}w[o]=k;k=z(j,14);i=z(j,18);h=z(j,41);k=new s(k.a^i.a^h.a,k.b^i.b^h.b);i=new s(j.a&l.a^~j.a&u.a,j.b&l.b^~j.b&u.b);h=D[o];m=w[o];x=r=p=a;p=(t.b&65535)+(k.b&65535)+(i.b&65535)+(h.b&65535)+(m.b&65535);r=(t.b>>>16)+(k.b>>>16)+(i.b>>>16)+(h.b>>>16)+(m.b>>>16)+(p>>>16);x=(r&65535)<<16|p&65535;p=(t.a&65535)+(k.a&65535)+(i.a&65535)+(h.a&65535)+(m.a&65535)+
+(r>>>16);r=(t.a>>>16)+(k.a>>>16)+(i.a>>>16)+(h.a>>>16)+(m.a>>>16)+(p>>>16);k=new s((r&65535)<<16|p&65535,x);t=z(f,28);i=z(f,34);h=z(f,39);i=B(new s(t.a^i.a^h.a,t.b^i.b^h.b),new s(f.a&e.a^f.a&n.a^e.a&n.a,f.b&e.b^f.b&n.b^e.b&n.b));t=u;u=l;l=j;j=B(g,k);g=n;n=e;e=f;f=B(k,i)}d[0]=B(f,d[0]);d[1]=B(e,d[1]);d[2]=B(n,d[2]);d[3]=B(g,d[3]);d[4]=B(j,d[4]);d[5]=B(l,d[5]);d[6]=B(u,d[6]);d[7]=B(t,d[7])}return[d[0].a,d[0].b,d[1].a,d[1].b,d[2].a,d[2].b,d[3].a,d[3].b,d[4].a,d[4].b,d[5].a,d[5].b,d[6].a,d[6].b,d[7].a,
+d[7].b]}
+window.process=function(){var b=document.getElementById("hostname").value,c=document.getElementById("mpass").value,f=parseInt(document.getElementById("limlength").value,10),e=document.getElementById("alnum").checked,n=document.getElementById("result");if(c!=document.getElementById("retmpass").value)n.value="Passwords must be identical";else{var b=q(b),g=q(c),j,l=[],c=[];j=y(g);g=8*g.length;128<g/8?(j=C(j,g),j[31]&=4294967040):128>g/8&&(j[31]&=4294967040);for(g=0;31>=g;g+=1)l[g]=j[g]^909522486,c[g]=
+j[g]^1549556828;b=C(l.concat(y(b)),1024+8*b.length);b=C(c.concat(b),1536);c="";j=4*b.length;for(var u,l=0;l<j;l+=3){u=(b[l>>2]>>8*(3-l%4)&255)<<16|(b[l+1>>2]>>8*(3-(l+1)%4)&255)<<8|b[l+2>>2]>>8*(3-(l+2)%4)&255;for(g=0;4>g;g+=1)8*l+6*g<=32*b.length&&(c+="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(u>>6*(3-g)&63))}b=c;b=e?b.replace(/[\+\/]/g,""):b.replace(/\+/g,"-").replace(/\//g,"_");isNaN(f)||(b=b.substring(0,f));n.value=b}};
+    //--><!]]></script>
+
+  </head>
+  <body>
+    <form action="">
+      <table>
+        <tr>
+          <td>
+            <label for="hostname">Hostname:</label>
+          </td>
+          <td>
+            <input type="text" id="hostname" size="100" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="mpass">Masterpass:</label>
+          </td>
+          <td>
+            <input type="password" id="mpass" size="100" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="retmpass">Retype masterpass:</label>
+          </td>
+          <td>
+            <input type="password" id="retmpass" size="100" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="limlength">Only alphanumeric:</label>
+          </td>
+          <td>
+            <input type="checkbox" id="alnum" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="limlength">Limit length:</label>
+          </td>
+          <td>
+            <input type="text" id="limlength" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <!--<input type="button" value="OK" onclick="process()" />-->
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="result">Result:</label>
+          </td>
+          <td>
+            <input type="text" id="result" size="100" />
+        </td>
+        </tr>
+      </table>
+    </form>
+  </body>
+</html>

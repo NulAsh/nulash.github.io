@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>passgen2</title>
+    <script type="text/javascript"><!--//--><![CDATA[//><!--
+
+      function utf8_encode(string) {
+        string = string.replace(/\r\n/g,"\n");
+        var utftext = "";
+        for (var n = 0; n < string.length; n++) {
+          var c = string.charCodeAt(n);
+          if (c < 128) {
+            utftext += String.fromCharCode(c);
+          } else if ((c > 127) && (c < 2048)) {
+            utftext += String.fromCharCode((c >> 6) | 192);
+            utftext += String.fromCharCode((c & 63) | 128);
+          } else {
+            utftext += String.fromCharCode((c >> 12) | 224);
+            utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+            utftext += String.fromCharCode((c & 63) | 128);
+          }
+        }
+        return utftext;
+      }
+
+      function Int_64(msint_32, lsint_32) {
+        this.highOrder = msint_32;
+        this.lowOrder = lsint_32;
+      }
+
+      function str2binb(str) {
+        var bin = [], mask = (1 << 8) - 1,
+        length = str.length * 8, i;
+        for (i = 0; i < length; i += 8) {
+          bin[i >> 5] |= (str.charCodeAt(i / 8) & mask) << (32 - 8 - (i % 32));
+        }
+        return bin;
+      }
+
+      function binb2b64(binarray) {
+        var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+          str = "", length = binarray.length * 4, i, j, triplet;
+        for (i = 0; i < length; i += 3) {
+          triplet = (((binarray[i >> 2] >> 8 * (3 - i % 4)) & 0xFF) << 16) |
+          (((binarray[i + 1 >> 2] >> 8 * (3 - (i + 1) % 4)) & 0xFF) << 8) |
+          ((binarray[i + 2 >> 2] >> 8 * (3 - (i + 2) % 4)) & 0xFF);
+          for (j = 0; j < 4; j += 1) {
+            if (i * 8 + j * 6 <= binarray.length * 32) {
+              str += tab.charAt((triplet >> 6 * (3 - j)) & 0x3F);
+            }
+          }
+        }
+        return str;
+      }
+
+      function rotr_64(x, n) {
+        if (n <= 32) {
+          return new Int_64(
+            (x.highOrder >>> n) | (x.lowOrder << (32 - n)),
+            (x.lowOrder >>> n) | (x.highOrder << (32 - n))
+          );
+        } else {
+          return new Int_64(
+            (x.lowOrder >>> n) | (x.highOrder << (32 - n)),
+            (x.highOrder >>> n) | (x.lowOrder << (32 - n))
+          );
+        }
+      }
+
+      function shr_64(x, n) {
+        if (n <= 32) {
+          return new Int_64(
+            x.highOrder >>> n,
+            x.lowOrder >>> n | (x.highOrder << (32 - n))
+          );
+        } else {
+          return new Int_64(
+            0,
+            x.highOrder << (32 - n)
+          );
+        }
+      }
+
+      function ch_64(x, y, z) {
+        return new Int_64(
+          (x.highOrder & y.highOrder) ^ (~x.highOrder & z.highOrder),
+          (x.lowOrder & y.lowOrder) ^ (~x.lowOrder & z.lowOrder)
+        );
+      }
+
+      function maj_64(x, y, z) {
+        return new Int_64(
+          (x.highOrder & y.highOrder) ^
+          (x.highOrder & z.highOrder) ^
+          (y.highOrder & z.highOrder),
+          (x.lowOrder & y.lowOrder) ^
+          (x.lowOrder & z.lowOrder) ^
+          (y.lowOrder & z.lowOrder)
+        );
+      }
+
+      function sigma0_64(x) {
+        var rotr28 = rotr_64(x, 28), rotr34 = rotr_64(x, 34), rotr39 = rotr_64(x, 39);
+        return new Int_64(
+          rotr28.highOrder ^ rotr34.highOrder ^ rotr39.highOrder,
+          rotr28.lowOrder ^ rotr34.lowOrder ^ rotr39.lowOrder);
+      }
+
+      function sigma1_64(x) {
+        var rotr14 = rotr_64(x, 14), rotr18 = rotr_64(x, 18), rotr41 = rotr_64(x, 41);
+        return new Int_64(
+          rotr14.highOrder ^ rotr18.highOrder ^ rotr41.highOrder,
+          rotr14.lowOrder ^ rotr18.lowOrder ^ rotr41.lowOrder);
+      }
+
+      function gamma0_64(x) {
+        var rotr1 = rotr_64(x, 1), rotr8 = rotr_64(x, 8), shr7 = shr_64(x, 7);
+        return new Int_64(
+          rotr1.highOrder ^ rotr8.highOrder ^ shr7.highOrder,
+          rotr1.lowOrder ^ rotr8.lowOrder ^ shr7.lowOrder
+        );
+      }
+
+      function gamma1_64(x) {
+        var rotr19 = rotr_64(x, 19), rotr61 = rotr_64(x, 61), shr6 = shr_64(x, 6);
+        return new Int_64(
+          rotr19.highOrder ^ rotr61.highOrder ^ shr6.highOrder,
+          rotr19.lowOrder ^ rotr61.lowOrder ^ shr6.lowOrder
+        );
+      }
+
+      function safeAdd_64_2(x, y) {
+        var lsw, msw, lowOrder, highOrder;
+        lsw = (x.lowOrder & 0xFFFF) + (y.lowOrder & 0xFFFF);
+        msw = (x.lowOrder >>> 16) + (y.lowOrder >>> 16) + (lsw >>> 16);
+        lowOrder = ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
+        lsw = (x.highOrder & 0xFFFF) + (y.highOrder & 0xFFFF) + (msw >>> 16);
+        msw = (x.highOrder >>> 16) + (y.highOrder >>> 16) + (lsw >>> 16);
+        highOrder = ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
+        return new Int_64(highOrder, lowOrder);
+      }
+
+      function safeAdd_64_4(a, b, c, d) {
+        var lsw, msw, lowOrder, highOrder;
+        lsw = (a.lowOrder & 0xFFFF) + (b.lowOrder & 0xFFFF) +
+        (c.lowOrder & 0xFFFF) + (d.lowOrder & 0xFFFF);
+        msw = (a.lowOrder >>> 16) + (b.lowOrder >>> 16) +
+        (c.lowOrder >>> 16) + (d.lowOrder >>> 16) + (lsw >>> 16);
+        lowOrder = ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
+        lsw = (a.highOrder & 0xFFFF) + (b.highOrder & 0xFFFF) +
+        (c.highOrder & 0xFFFF) + (d.highOrder & 0xFFFF) + (msw >>> 16);
+        msw = (a.highOrder >>> 16) + (b.highOrder >>> 16) +
+        (c.highOrder >>> 16) + (d.highOrder >>> 16) + (lsw >>> 16);
+        highOrder = ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
+        return new Int_64(highOrder, lowOrder);
+      }
+
+      function safeAdd_64_5(a, b, c, d, e) {
+        var lsw, msw, lowOrder, highOrder;
+        lsw = (a.lowOrder & 0xFFFF) + (b.lowOrder & 0xFFFF) +
+        (c.lowOrder & 0xFFFF) + (d.lowOrder & 0xFFFF) +
+        (e.lowOrder & 0xFFFF);
+        msw = (a.lowOrder >>> 16) + (b.lowOrder >>> 16) +
+        (c.lowOrder >>> 16) + (d.lowOrder >>> 16) + (e.lowOrder >>> 16) +
+        (lsw >>> 16);
+        lowOrder = ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
+        lsw = (a.highOrder & 0xFFFF) + (b.highOrder & 0xFFFF) +
+        (c.highOrder & 0xFFFF) + (d.highOrder & 0xFFFF) +
+        (e.highOrder & 0xFFFF) + (msw >>> 16);
+        msw = (a.highOrder >>> 16) + (b.highOrder >>> 16) +
+        (c.highOrder >>> 16) + (d.highOrder >>> 16) +
+        (e.highOrder >>> 16) + (lsw >>> 16);
+        highOrder = ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
+        return new Int_64(highOrder, lowOrder);
+      }
+
+      function coreSHA2(message, messageLen) {
+        var a, b, c, d, e, f, g, h, T1, T2, H, i, t,
+        K, W = [], appendedMessageLength;
+        K = [
+          new Int_64(0x428a2f98, 0xd728ae22), new Int_64(0x71374491, 0x23ef65cd),
+          new Int_64(0xb5c0fbcf, 0xec4d3b2f), new Int_64(0xe9b5dba5, 0x8189dbbc),
+          new Int_64(0x3956c25b, 0xf348b538), new Int_64(0x59f111f1, 0xb605d019),
+          new Int_64(0x923f82a4, 0xaf194f9b), new Int_64(0xab1c5ed5, 0xda6d8118),
+          new Int_64(0xd807aa98, 0xa3030242), new Int_64(0x12835b01, 0x45706fbe),
+          new Int_64(0x243185be, 0x4ee4b28c), new Int_64(0x550c7dc3, 0xd5ffb4e2),
+          new Int_64(0x72be5d74, 0xf27b896f), new Int_64(0x80deb1fe, 0x3b1696b1),
+          new Int_64(0x9bdc06a7, 0x25c71235), new Int_64(0xc19bf174, 0xcf692694),
+          new Int_64(0xe49b69c1, 0x9ef14ad2), new Int_64(0xefbe4786, 0x384f25e3),
+          new Int_64(0x0fc19dc6, 0x8b8cd5b5), new Int_64(0x240ca1cc, 0x77ac9c65),
+          new Int_64(0x2de92c6f, 0x592b0275), new Int_64(0x4a7484aa, 0x6ea6e483),
+          new Int_64(0x5cb0a9dc, 0xbd41fbd4), new Int_64(0x76f988da, 0x831153b5),
+          new Int_64(0x983e5152, 0xee66dfab), new Int_64(0xa831c66d, 0x2db43210),
+          new Int_64(0xb00327c8, 0x98fb213f), new Int_64(0xbf597fc7, 0xbeef0ee4),
+          new Int_64(0xc6e00bf3, 0x3da88fc2), new Int_64(0xd5a79147, 0x930aa725),
+          new Int_64(0x06ca6351, 0xe003826f), new Int_64(0x14292967, 0x0a0e6e70),
+          new Int_64(0x27b70a85, 0x46d22ffc), new Int_64(0x2e1b2138, 0x5c26c926),
+          new Int_64(0x4d2c6dfc, 0x5ac42aed), new Int_64(0x53380d13, 0x9d95b3df),
+          new Int_64(0x650a7354, 0x8baf63de), new Int_64(0x766a0abb, 0x3c77b2a8),
+          new Int_64(0x81c2c92e, 0x47edaee6), new Int_64(0x92722c85, 0x1482353b),
+          new Int_64(0xa2bfe8a1, 0x4cf10364), new Int_64(0xa81a664b, 0xbc423001),
+          new Int_64(0xc24b8b70, 0xd0f89791), new Int_64(0xc76c51a3, 0x0654be30),
+          new Int_64(0xd192e819, 0xd6ef5218), new Int_64(0xd6990624, 0x5565a910),
+          new Int_64(0xf40e3585, 0x5771202a), new Int_64(0x106aa070, 0x32bbd1b8),
+          new Int_64(0x19a4c116, 0xb8d2d0c8), new Int_64(0x1e376c08, 0x5141ab53),
+          new Int_64(0x2748774c, 0xdf8eeb99), new Int_64(0x34b0bcb5, 0xe19b48a8),
+          new Int_64(0x391c0cb3, 0xc5c95a63), new Int_64(0x4ed8aa4a, 0xe3418acb),
+          new Int_64(0x5b9cca4f, 0x7763e373), new Int_64(0x682e6ff3, 0xd6b2b8a3),
+          new Int_64(0x748f82ee, 0x5defb2fc), new Int_64(0x78a5636f, 0x43172f60),
+          new Int_64(0x84c87814, 0xa1f0ab72), new Int_64(0x8cc70208, 0x1a6439ec),
+          new Int_64(0x90befffa, 0x23631e28), new Int_64(0xa4506ceb, 0xde82bde9),
+          new Int_64(0xbef9a3f7, 0xb2c67915), new Int_64(0xc67178f2, 0xe372532b),
+          new Int_64(0xca273ece, 0xea26619c), new Int_64(0xd186b8c7, 0x21c0c207),
+          new Int_64(0xeada7dd6, 0xcde0eb1e), new Int_64(0xf57d4f7f, 0xee6ed178),
+          new Int_64(0x06f067aa, 0x72176fba), new Int_64(0x0a637dc5, 0xa2c898a6),
+          new Int_64(0x113f9804, 0xbef90dae), new Int_64(0x1b710b35, 0x131c471b),
+          new Int_64(0x28db77f5, 0x23047d84), new Int_64(0x32caab7b, 0x40c72493),
+          new Int_64(0x3c9ebe0a, 0x15c9bebc), new Int_64(0x431d67c4, 0x9c100d4c),
+          new Int_64(0x4cc5d4be, 0xcb3e42b6), new Int_64(0x597f299c, 0xfc657e2a),
+          new Int_64(0x5fcb6fab, 0x3ad6faec), new Int_64(0x6c44198c, 0x4a475817)
+        ];
+        H = [
+          new Int_64(0x6a09e667, 0xf3bcc908), new Int_64(0xbb67ae85, 0x84caa73b),
+          new Int_64(0x3c6ef372, 0xfe94f82b), new Int_64(0xa54ff53a, 0x5f1d36f1),
+          new Int_64(0x510e527f, 0xade682d1), new Int_64(0x9b05688c, 0x2b3e6c1f),
+          new Int_64(0x1f83d9ab, 0xfb41bd6b), new Int_64(0x5be0cd19, 0x137e2179)
+        ];
+        message[messageLen >> 5] |= 0x80 << (24 - messageLen % 32);
+        message[(((messageLen + 128) >> 10) << 5) + 31] = messageLen;
+        appendedMessageLength = message.length;
+        for (i = 0; i < appendedMessageLength; i += 32) {
+          a = H[0];
+          b = H[1];
+          c = H[2];
+          d = H[3];
+          e = H[4];
+          f = H[5];
+          g = H[6];
+          h = H[7];
+
+          for (t = 0; t < 80; t += 1) {
+            if (t < 16) {
+              W[t] = new Int_64(message[2*t+i],
+                message[2*t+i+1]);
+            } else {
+              W[t] = safeAdd_64_4(
+                gamma1_64(W[t - 2]), W[t - 7],
+                gamma0_64(W[t - 15]), W[t - 16]
+              );
+            }
+
+            T1 = safeAdd_64_5(h, sigma1_64(e), ch_64(e, f, g), K[t], W[t]);
+            T2 = safeAdd_64_2(sigma0_64(a), maj_64(a, b, c));
+            h = g;
+            g = f;
+            f = e;
+            e = safeAdd_64_2(d, T1);
+            d = c;
+            c = b;
+            b = a;
+            a = safeAdd_64_2(T1, T2);
+          }
+
+          H[0] = safeAdd_64_2(a, H[0]);
+          H[1] = safeAdd_64_2(b, H[1]);
+          H[2] = safeAdd_64_2(c, H[2]);
+          H[3] = safeAdd_64_2(d, H[3]);
+          H[4] = safeAdd_64_2(e, H[4]);
+          H[5] = safeAdd_64_2(f, H[5]);
+          H[6] = safeAdd_64_2(g, H[6]);
+          H[7] = safeAdd_64_2(h, H[7]);
+        }
+
+        return [
+          H[0].highOrder, H[0].lowOrder,
+          H[1].highOrder, H[1].lowOrder,
+          H[2].highOrder, H[2].lowOrder,
+          H[3].highOrder, H[3].lowOrder,
+          H[4].highOrder, H[4].lowOrder,
+          H[5].highOrder, H[5].lowOrder,
+          H[6].highOrder, H[6].lowOrder,
+          H[7].highOrder, H[7].lowOrder
+        ];
+      }
+
+      function getHMAC(srcString,key) {
+        var keyToUse, i, retVal, keyBinLen, keyWithIPad = [], keyWithOPad = [];
+        keyToUse = str2binb(key);
+        keyBinLen = key.length * 8;
+        if (128 < (keyBinLen / 8)) {
+          keyToUse = coreSHA2(keyToUse, keyBinLen);
+          keyToUse[31] &= 0xFFFFFF00;
+        } else if (128 > (keyBinLen / 8)) {
+          keyToUse[31] &= 0xFFFFFF00;
+        }
+        for (i = 0; i <= 31; i += 1) {
+          keyWithIPad[i] = keyToUse[i] ^ 0x36363636;
+          keyWithOPad[i] = keyToUse[i] ^ 0x5C5C5C5C;
+        }
+        retVal = coreSHA2(
+          keyWithIPad.concat(str2binb(srcString)),
+          1024 + srcString.length * 8);
+        retVal = coreSHA2(
+          keyWithOPad.concat(retVal),
+          1024 + 512);
+        return (binb2b64(retVal));
+      }
+
+      function process() {
+        var hostname = document.getElementById("hostname").value;
+        var mpass = document.getElementById("mpass").value;
+        var retmpass = document.getElementById("retmpass").value;
+        var limlength = parseInt(document.getElementById("limlength").value);
+        var alnum = document.getElementById("alnum").checked;
+        var result = document.getElementById("result");
+        if (mpass != retmpass) {
+          result.value = "Passwords must be identical";
+        } else {
+          var pass = getHMAC(utf8_encode(hostname),utf8_encode(mpass));
+          if (alnum) {
+            pass = pass.replace(/[\+\/]/g,"");
+          } else {
+            pass = pass.replace(/\+/g,"-").replace(/\//g,"_");
+          }
+          if (!isNaN(limlength)) {
+            pass = pass.substring(0, limlength);
+          }
+          result.value = pass;
+        }
+
+      }
+
+    //--><!]]></script>
+
+  </head>
+  <body>
+    <form action="">
+      <table>
+        <tr>
+          <td>
+            <label for="hostname">Hostname:</label>
+          </td>
+          <td>
+            <input type="text" id="hostname" size="100" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="mpass">Masterpass:</label>
+          </td>
+          <td>
+            <input type="password" id="mpass" size="100" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="retmpass">Retype masterpass:</label>
+          </td>
+          <td>
+            <input type="password" id="retmpass" size="100" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="limlength">Only alphanumeric:</label>
+          </td>
+          <td>
+            <input type="checkbox" id="alnum" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="limlength">Limit length:</label>
+          </td>
+          <td>
+            <input type="text" id="limlength" onchange="process()" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <!--<input type="button" value="OK" onclick="process()" />-->
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="result">Result:</label>
+          </td>
+          <td>
+            <input type="text" id="result" size="100" />
+        </td>
+        </tr>
+      </table>
+    </form>
+  </body>
+</html>
