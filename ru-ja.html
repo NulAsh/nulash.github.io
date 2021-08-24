@@ -1,0 +1,1318 @@
+<!-- 
+    This work is licensed under Attribution 4.0 International 
+    Transform rules (c) Hiroshi Takenaka
+    Javascript port (c) NulAsh
+-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Ru -> Ja &quot;translit&quot;</title>
+        <script>
+            function ru_ja(s) {
+                const tmp = s.normalize('NFC').toLowerCase().replaceAll(/([аеийоуыьэюяёъ])го(?=[^а-я]|$)/g, '$1во');
+                const l = tmp.length;
+                const out = [];
+                let i = 0;
+                while (i < l) {
+                    const a1 = tmp.substr(i, 1);
+                    const a2 = tmp.substr(i, 2);
+                    const a3 = tmp.substr(i, 3);
+                    const a4 = tmp.substr(i, 4);
+                    if (a1 == 'а') {
+                        out.push('ア');
+                        i += 1;
+                    } else if (a2 == 'ба') {
+                        out.push('バ');
+                        i += 2;
+                    } else if (a2 == 'бе') {
+                        out.push('ベ');
+                        i += 2;
+                    } else if (a3 == 'бий') {
+                        out.push('ビー');
+                        i += 3;
+                    } else if (a2 == 'би') {
+                        out.push('ビ');
+                        i += 2;
+                    } else if (a2 == 'бо') {
+                        out.push('ボ');
+                        i += 2;
+                    } else if (a2 == 'бу') {
+                        out.push('ブ');
+                        i += 2;
+                    } else if (a2 == 'бы') {
+                        out.push('ビ');
+                        i += 2;
+                    } else if (a2 == 'бь') {
+                        out.push('ビ');
+                        i += 2;
+                    } else if (a2 == 'бэ') {
+                        out.push('ベ');
+                        i += 2;
+                    } else if (a2 == 'бю') {
+                        out.push('ビュ');
+                        i += 2;
+                    } else if (a2 == 'бя') {
+                        out.push('ビャ');
+                        i += 2;
+                    } else if (a2 == 'бё') {
+                        out.push('ビョ');
+                        i += 2;
+                    } else if (a1 == 'б') {
+                        out.push('ブ');
+                        i += 1;
+                    } else if (a2 == 'ва') {
+                        out.push('ヴァ');
+                        i += 2;
+                    } else if (a2 == 'ве') {
+                        out.push('ヴェ');
+                        i += 2;
+                    } else if (a3 == 'вий') {
+                        out.push('ヴィ');
+                        i += 3;
+                    } else if (a2 == 'ви') {
+                        out.push('ヴィ');
+                        i += 2;
+                    } else if (a2 == 'во') {
+                        out.push('ヴォ');
+                        i += 2;
+                    } else if (a2 == 'ву') {
+                        out.push('ヴ');
+                        i += 2;
+                    } else if (a3 == 'вый') {
+                        out.push('ヴィ');
+                        i += 3;
+                    } else if (a2 == 'вы') {
+                        out.push('ヴィ');
+                        i += 2;
+                    } else if (a2 == 'вь') {
+                        out.push('ヴィ');
+                        i += 2;
+                    } else if (a2 == 'вэ') {
+                        out.push('ヴェ');
+                        i += 2;
+                    } else if (a2 == 'вю') {
+                        out.push('ヴュ');
+                        i += 2;
+                    } else if (a2 == 'вя') {
+                        out.push('ヴャ');
+                        i += 2;
+                    } else if (a2 == 'вё') {
+                        out.push('ヴョ');
+                        i += 2;
+                    } else if (a2 == 'въ') {
+                        out.push('ヴィ');
+                        i += 2;
+                    } else if (a2.match(/в[линр]/)) {
+                        out.push('ヴ');
+                        i += 1;
+                    } else if (a1 == 'в') {
+                        out.push('フ');
+                        i += 1;
+                    } else if (a2 == 'га') {
+                        out.push('ガ');
+                        i += 2;
+                    } else if (a2 == 'ге') {
+                        out.push('ゲ');
+                        i += 2;
+                    } else if (a3 == 'гий') {
+                        out.push('ギ');
+                        i += 3;
+                    } else if (a2 == 'ги') {
+                        out.push('ギ');
+                        i += 2;
+                    } else if (a2 == 'го') {
+                        out.push('ゴ');
+                        i += 2;
+                    } else if (a2 == 'гу') {
+                        out.push('グ');
+                        i += 2;
+                    } else if (a3 == 'гый') {
+                        out.push('ギ');
+                        i += 3;
+                    } else if (a2 == 'гы') {
+                        out.push('ギ');
+                        i += 2;
+                    } else if (a2 == 'гь') {
+                        out.push('ギ');
+                        i += 2;
+                    } else if (a2 == 'гъ') {
+                        out.push('ギ');
+                        i += 2;
+                    } else if (a2 == 'гэ') {
+                        out.push('ゲ');
+                        i += 2;
+                    } else if (a2 == 'гю') {
+                        out.push('ギュ');
+                        i += 2;
+                    } else if (a2 == 'гя') {
+                        out.push('ギャ');
+                        i += 2;
+                    } else if (a2 == 'гё') {
+                        out.push('ギョ');
+                        i += 2;
+                    } else if (a2 == 'гг') {
+                        out.push('ッ');
+                        i += 1;
+                    } else if (a1 == 'г') {
+                        out.push('グ');
+                        i += 1;
+                    } else if (a2 == 'да') {
+                        out.push('ダ');
+                        i += 2;
+                    } else if (a2 == 'де') {
+                        out.push('デ');
+                        i += 2;
+                    } else if (a3 == 'джа') {
+                        out.push('ジャ');
+                        i += 3;
+                    } else if (a3 == 'дже') {
+                        out.push('ジェ');
+                        i += 3;
+                    } else if (a4 == 'джий') {
+                        out.push('ジ');
+                        i += 4;
+                    } else if (a3 == 'джи') {
+                        out.push('ジ');
+                        i += 3;
+                    } else if (a3 == 'джо') {
+                        out.push('ジョ');
+                        i += 3;
+                    } else if (a3 == 'джу') {
+                        out.push('ジュ');
+                        i += 3;
+                    } else if (a4 == 'джый') {
+                        out.push('ギ');
+                        i += 4;
+                    } else if (a3 == 'джы') {
+                        out.push('ジ');
+                        i += 3;
+                    } else if (a3 == 'джь') {
+                        out.push('ギ');
+                        i += 3;
+                    } else if (a3 == 'джэ') {
+                        out.push('ジェ');
+                        i += 3;
+                    } else if (a3 == 'джю') {
+                        out.push('ジュ');
+                        i += 3;
+                    } else if (a3 == 'джя') {
+                        out.push('ジャ');
+                        i += 3;
+                    } else if (a3 == 'джё') {
+                        out.push('ジョ');
+                        i += 3;
+                    } else if (a2 == 'дж') {
+                        out.push('ジ');
+                        i += 2;
+                    } else if (a3 == 'дза') {
+                        out.push('ザ');
+                        i += 3;
+                    } else if (a3 == 'дзе') {
+                        out.push('ゼ');
+                        i += 3;
+                    } else if (a4 == 'дзий') {
+                        out.push('ドジ');
+                        i += 4;
+                    } else if (a3 == 'дзи') {
+                        out.push('ドジ');
+                        i += 3;
+                    } else if (a3 == 'дзо') {
+                        out.push('ゾ');
+                        i += 3;
+                    } else if (a3 == 'дзу') {
+                        out.push('ズ');
+                        i += 3;
+                    } else if (a4 == 'дзый') {
+                        out.push('ドジ');
+                        i += 4;
+                    } else if (a3 == 'дзы') {
+                        out.push('ドジ');
+                        i += 3;
+                    } else if (a3 == 'дзь') {
+                        out.push('ドジ');
+                        i += 3;
+                    } else if (a3 == 'дзэ') {
+                        out.push('ゼ');
+                        i += 3;
+                    } else if (a3 == 'дзю') {
+                        out.push('ジュ');
+                        i += 3;
+                    } else if (a3 == 'дзя') {
+                        out.push('ジャ');
+                        i += 3;
+                    } else if (a3 == 'дзё') {
+                        out.push('ドジョ');
+                        i += 3;
+                    } else if (a2 == 'дз') {
+                        out.push('ドゼ');
+                        i += 2;
+                    } else if (a3 == 'дий') {
+                        out.push('ジ');
+                        i += 3;
+                    } else if (a2 == 'ди') {
+                        out.push('ジ');
+                        i += 2;
+                    } else if (a2 == 'до') {
+                        out.push('ド');
+                        i += 2;
+                    } else if (a3 == 'дса') {
+                        out.push('ツァ');
+                        i += 3;
+                    } else if (a3 == 'дсе') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a4 == 'дсий') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'дси') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'дсо') {
+                        out.push('ツォ');
+                        i += 3;
+                    } else if (a3 == 'дсу') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a4 == 'дсый') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'дсы') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'дсь') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'дсэ') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a3 == 'дсю') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a3 == 'дся') {
+                        out.push('ツィア');
+                        i += 3;
+                    } else if (a2 == 'дс') {
+                        out.push('ツ');
+                        i += 2;
+                    } else if (a2 == 'ду') {
+                        out.push('ドゥ');
+                        i += 2;
+                    } else if (a3 == 'дца') {
+                        out.push('ツァ');
+                        i += 3;
+                    } else if (a3 == 'дце') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a4 == 'дций') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'дци') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'дцо') {
+                        out.push('ツォ');
+                        i += 3;
+                    } else if (a3 == 'дцу') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a4 == 'дцый') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'дцы') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'дць') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'дцэ') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a3 == 'дцю') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a3 == 'дця') {
+                        out.push('ツィア');
+                        i += 3;
+                    } else if (a2 == 'дц') {
+                        out.push('ツ');
+                        i += 2;
+                    } else if (a3 == 'дча') {
+                        out.push('チャ');
+                        i += 3;
+                    } else if (a3 == 'дче') {
+                        out.push('チェ');
+                        i += 3;
+                    } else if (a4 == 'дчий') {
+                        out.push('チ');
+                        i += 4;
+                    } else if (a3 == 'дчи') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a3 == 'дчо') {
+                        out.push('チョ');
+                        i += 3;
+                    } else if (a3 == 'дчу') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a4 == 'дчый') {
+                        out.push('チ');
+                        i += 4;
+                    } else if (a3 == 'дчы') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a3 == 'дчь') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a3 == 'дчэ') {
+                        out.push('チェ');
+                        i += 3;
+                    } else if (a3 == 'дчё') {
+                        out.push('チョ');
+                        i += 3;
+                    } else if (a2 == 'дч') {
+                        out.push('チ');
+                        i += 2;
+                    } else if (a3 == 'дый') {
+                        out.push('ド');
+                        i += 3;
+                    } else if (a2 == 'ды') {
+                        out.push('ディ');
+                        i += 2;
+                    } else if (a3 == 'дью') {
+                        out.push('ジュ');
+                        i += 3;
+                    } else if (a2 == 'дь') {
+                        out.push('ジ');
+                        i += 2;
+                    } else if (a2 == 'дэ') {
+                        out.push('デ');
+                        i += 2;
+                    } else if (a2 == 'дю') {
+                        out.push('ジュ');
+                        i += 2;
+                    } else if (a2 == 'дя') {
+                        out.push('ジャ');
+                        i += 2;
+                    } else if (a2 == 'дё') {
+                        out.push('ジョ');
+                        i += 2;
+                    } else if (a1 == 'д') {
+                        out.push('ド');
+                        i += 1;
+                    } else if (a1 == 'е') {
+                        out.push('エ');
+                        i += 1;
+                    } else if (a2 == 'жа') {
+                        out.push('ジャ');
+                        i += 2;
+                    } else if (a2 == 'же') {
+                        out.push('ジェ');
+                        i += 2;
+                    } else if (a3 == 'жий') {
+                        out.push('ジ');
+                        i += 3;
+                    } else if (a2 == 'жи') {
+                        out.push('ジュ');
+                        i += 2;
+                    } else if (a2 == 'жо') {
+                        out.push('ジョ');
+                        i += 2;
+                    } else if (a2 == 'жу') {
+                        out.push('ジュ');
+                        i += 2;
+                    } else if (a3 == 'жый') {
+                        out.push('ジュ');
+                        i += 3;
+                    } else if (a2 == 'жы') {
+                        out.push('ジ');
+                        i += 2;
+                    } else if (a2 == 'жь') {
+                        out.push('ジ');
+                        i += 2;
+                    } else if (a2 == 'жэ') {
+                        out.push('ジェ');
+                        i += 2;
+                    } else if (a2 == 'жю') {
+                        out.push('ジュ');
+                        i += 2;
+                    } else if (a2 == 'жя') {
+                        out.push('ジャ');
+                        i += 2;
+                    } else if (a2 == 'жё') {
+                        out.push('ジョ');
+                        i += 2;
+                    } else if (a1 == 'ж') {
+                        out.push('シュ');
+                        i += 1;
+                    } else if (a2 == 'за') {
+                        out.push('ザ');
+                        i += 2;
+                    } else if (a2 == 'зе') {
+                        out.push('ゼ');
+                        i += 2;
+                    } else if (a3 == 'зий') {
+                        out.push('ジ');
+                        i += 3;
+                    } else if (a2 == 'зи') {
+                        out.push('ジ');
+                        i += 2;
+                    } else if (a2 == 'зо') {
+                        out.push('ゾ');
+                        i += 2;
+                    } else if (a2 == 'зу') {
+                        out.push('ズ');
+                        i += 2;
+                    } else if (a3 == 'зый') {
+                        out.push('ジ');
+                        i += 3;
+                    } else if (a2 == 'зы') {
+                        out.push('ジ');
+                        i += 2;
+                    } else if (a2 == 'зь') {
+                        out.push('ジ');
+                        i += 2;
+                    } else if (a2 == 'зэ') {
+                        out.push('ゼ');
+                        i += 2;
+                    } else if (a2 == 'зю') {
+                        out.push('ジュ');
+                        i += 2;
+                    } else if (a2 == 'зя') {
+                        out.push('ジャ');
+                        i += 2;
+                    } else if (a2 == 'зё') {
+                        out.push('ジョ');
+                        i += 2;
+                    } else if (a1 == 'з') {
+                        out.push('ス');
+                        i += 1;
+                    } else if (a2 == 'ий') {
+                        out.push('イ');
+                        i += 2;
+                    } else if (a1 == 'и') {
+                        out.push('イ');
+                        i += 1;
+                    } else if (a1 == 'й') {
+                        out.push('イ');
+                        i += 1;
+                    } else if (a2 == 'ка') {
+                        out.push('カ');
+                        i += 2;
+                    } else if (a2 == 'ке') {
+                        out.push('ケ');
+                        i += 2;
+                    } else if (a3 == 'кий') {
+                        out.push('キー');
+                        i += 3;
+                    } else if (a2 == 'ки') {
+                        out.push('キ');
+                        i += 2;
+                    } else if (a2 == 'ко') {
+                        out.push('コ');
+                        i += 2;
+                    } else if (a2 == 'ку') {
+                        out.push('ク');
+                        i += 2;
+                    } else if (a2 == 'кы') {
+                        out.push('キ');
+                        i += 2;
+                    } else if (a2 == 'кь') {
+                        out.push('キ');
+                        i += 2;
+                    } else if (a2 == 'кэ') {
+                        out.push('ケ');
+                        i += 2;
+                    } else if (a2 == 'кю') {
+                        out.push('キュ');
+                        i += 2;
+                    } else if (a2 == 'кя') {
+                        out.push('キャ');
+                        i += 2;
+                    } else if (a2 == 'кё') {
+                        out.push('キョ');
+                        i += 2;
+                    } else if (a2 == 'къ') {
+                        out.push('キ');
+                        i += 2;
+                    } else if (a1 == 'к') {
+                        out.push('ク');
+                        i += 1;
+                    } else if (a2 == 'ла') {
+                        out.push('ラ');
+                        i += 2;
+                    } else if (a2 == 'ле') {
+                        out.push('レ');
+                        i += 2;
+                    } else if (a3 == 'лий') {
+                        out.push('リ');
+                        i += 3;
+                    } else if (a2 == 'ли') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'лй') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'ло') {
+                        out.push('ロ');
+                        i += 2;
+                    } else if (a2 == 'лу') {
+                        out.push('ル');
+                        i += 2;
+                    } else if (a3 == 'лый') {
+                        out.push('リ');
+                        i += 3;
+                    } else if (a2 == 'лы') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'ль') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'лэ') {
+                        out.push('レ');
+                        i += 2;
+                    } else if (a2 == 'лю') {
+                        out.push('リュ');
+                        i += 2;
+                    } else if (a2 == 'ля') {
+                        out.push('リャ');
+                        i += 2;
+                    } else if (a2 == 'лё') {
+                        out.push('リョ');
+                        i += 2;
+                    } else if (a1 == 'л') {
+                        out.push('ル');
+                        i += 1;
+                    } else if (a2 == 'ма') {
+                        out.push('マ');
+                        i += 2;
+                    } else if (a2 == 'ме') {
+                        out.push('メ');
+                        i += 2;
+                    } else if (a2 == 'ми') {
+                        out.push('ミ');
+                        i += 2;
+                    } else if (a2 == 'мо') {
+                        out.push('モ');
+                        i += 2;
+                    } else if (a2 == 'му') {
+                        out.push('ム');
+                        i += 2;
+                    } else if (a3 == 'мый') {
+                        out.push('ミ');
+                        i += 3;
+                    } else if (a2 == 'мы') {
+                        out.push('ミ');
+                        i += 2;
+                    } else if (a2 == 'мь') {
+                        out.push('ミ');
+                        i += 2;
+                    } else if (a2 == 'мъ') {
+                        out.push('ミ');
+                        i += 2;
+                    } else if (a2 == 'мэ') {
+                        out.push('メ');
+                        i += 2;
+                    } else if (a2 == 'мю') {
+                        out.push('ミュ');
+                        i += 2;
+                    } else if (a2 == 'мя') {
+                        out.push('ミャ');
+                        i += 2;
+                    } else if (a2 == 'мё') {
+                        out.push('ミョ');
+                        i += 2;
+                    } else if (a1 == 'м') {
+                        out.push('ム');
+                        i += 1;
+                    } else if (a2 == 'на') {
+                        out.push('ナ');
+                        i += 2;
+                    } else if (a2 == 'не') {
+                        out.push('ネ');
+                        i += 2;
+                    } else if (a3 == 'ний') {
+                        out.push('ニー');
+                        i += 3;
+                    } else if (a2 == 'ни') {
+                        out.push('ニ');
+                        i += 2;
+                    } else if (a2 == 'нй') {
+                        out.push('ニ');
+                        i += 2;
+                    } else if (a2 == 'но') {
+                        out.push('ノ');
+                        i += 2;
+                    } else if (a2 == 'ну') {
+                        out.push('ヌ');
+                        i += 2;
+                    } else if (a3 == 'ный') {
+                        out.push('ニ');
+                        i += 3;
+                    } else if (a2 == 'ны') {
+                        out.push('ニ');
+                        i += 2;
+                    } else if (a2 == 'нь') {
+                        out.push('ニ');
+                        i += 2;
+                    } else if (a2 == 'нэ') {
+                        out.push('ネ');
+                        i += 2;
+                    } else if (a2 == 'ню') {
+                        out.push('ニュ');
+                        i += 2;
+                    } else if (a2 == 'ня') {
+                        out.push('ニャ');
+                        i += 2;
+                    } else if (a2 == 'нё') {
+                        out.push('ニョ');
+                        i += 2;
+                    } else if (a2 == 'нъ') {
+                        out.push('ニ');
+                        i += 2;
+                    } else if (a2.match(/н[^аеийоуыьэюяёъ]/)) {
+                        out.push('ン');
+                        i += 1;
+                    } else if (a1 == 'о') {
+                        out.push('オ');
+                        i += 1;
+                    } else if (a2 == 'па') {
+                        out.push('パ');
+                        i += 2;
+                    } else if (a2 == 'пе') {
+                        out.push('ペ');
+                        i += 2;
+                    } else if (a3 == 'пий') {
+                        out.push('ピ');
+                        i += 3;
+                    } else if (a2 == 'пи') {
+                        out.push('ピ');
+                        i += 2;
+                    } else if (a2 == 'по') {
+                        out.push('ポ');
+                        i += 2;
+                    } else if (a2 == 'пу') {
+                        out.push('プ');
+                        i += 2;
+                    } else if (a3 == 'пый') {
+                        out.push('ピ');
+                        i += 3;
+                    } else if (a2 == 'пы') {
+                        out.push('ピ');
+                        i += 2;
+                    } else if (a2 == 'пь') {
+                        out.push('ピ');
+                        i += 2;
+                    } else if (a2 == 'пэ') {
+                        out.push('ペ');
+                        i += 2;
+                    } else if (a2 == 'пю') {
+                        out.push('ピュ');
+                        i += 2;
+                    } else if (a2 == 'пя') {
+                        out.push('ピャ');
+                        i += 2;
+                    } else if (a2 == 'пё') {
+                        out.push('ピョ');
+                        i += 2;
+                    } else if (a2 == 'пъ') {
+                        out.push('ピ');
+                        i += 2;
+                    } else if (a2 == 'пп') {
+                        out.push('ッ');
+                        i += 1;
+                    } else if (a1 == 'п') {
+                        out.push('プ');
+                        i += 1;
+                    } else if (a2 == 'ра') {
+                        out.push('ラ');
+                        i += 2;
+                    } else if (a2 == 'ре') {
+                        out.push('レ');
+                        i += 2;
+                    } else if (a3 == 'рий') {
+                        out.push('リ');
+                        i += 3;
+                    } else if (a2 == 'ри') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'рй') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'ро') {
+                        out.push('ロ');
+                        i += 2;
+                    } else if (a2 == 'ру') {
+                        out.push('ル');
+                        i += 2;
+                    } else if (a3 == 'рый') {
+                        out.push('リ');
+                        i += 3;
+                    } else if (a2 == 'ры') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'рь') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'ръ') {
+                        out.push('リ');
+                        i += 2;
+                    } else if (a2 == 'рэ') {
+                        out.push('レ');
+                        i += 2;
+                    } else if (a2 == 'рю') {
+                        out.push('リュ');
+                        i += 2;
+                    } else if (a2 == 'ря') {
+                        out.push('リャ');
+                        i += 2;
+                    } else if (a2 == 'рё') {
+                        out.push('リョ');
+                        i += 2;
+                    } else if (a1 == 'р') {
+                        out.push('ル');
+                        i += 1;
+                    } else if (a2 == 'са') {
+                        out.push('サ');
+                        i += 2;
+                    } else if (a2 == 'се') {
+                        out.push('セ');
+                        i += 2;
+                    } else if (a3 == 'сий') {
+                        out.push('シー');
+                        i += 3;
+                    } else if (a2 == 'си') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'со') {
+                        out.push('ソ');
+                        i += 2;
+                    } else if (a2 == 'су') {
+                        out.push('ス');
+                        i += 2;
+                    } else if (a4 == 'счий') {
+                        out.push('チ');
+                        i += 4;
+                    } else if (a3 == 'счи') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a3 == 'счо') {
+                        out.push('チョ');
+                        i += 3;
+                    } else if (a3 == 'счу') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a3 == 'счь') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a3 == 'счю') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a3 == 'счё') {
+                        out.push('チョ');
+                        i += 3;
+                    } else if (a3 == 'сый') {
+                        out.push('シ');
+                        i += 3;
+                    } else if (a2 == 'сы') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'сь') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'сэ') {
+                        out.push('セ');
+                        i += 2;
+                    } else if (a2 == 'сю') {
+                        out.push('シュ');
+                        i += 2;
+                    } else if (a2 == 'ся') {
+                        out.push('シャ');
+                        i += 2;
+                    } else if (a2 == 'сё') {
+                        out.push('ショ');
+                        i += 2;
+                    } else if (a2 == 'съ') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'сс') {
+                        out.push('ッ');
+                        i += 1;
+                    } else if (a1 == 'с') {
+                        out.push('ス');
+                        i += 1;
+                    } else if (a2 == 'та') {
+                        out.push('タ');
+                        i += 2;
+                    } else if (a2 == 'те') {
+                        out.push('テ');
+                        i += 2;
+                    } else if (a3 == 'тий') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a2 == 'ти') {
+                        out.push('チ');
+                        i += 2;
+                    } else if (a2 == 'то') {
+                        out.push('ト');
+                        i += 2;
+                    } else if (a3 == 'тса') {
+                        out.push('ツァ');
+                        i += 3;
+                    } else if (a3 == 'тсе') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a4 == 'тсий') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'тси') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'тсо') {
+                        out.push('ツォ');
+                        i += 3;
+                    } else if (a3 == 'тсу') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a4 == 'тсый') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'тсы') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'тсь') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'тсэ') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a3 == 'тсю') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a3 == 'тся') {
+                        out.push('ツィア');
+                        i += 3;
+                    } else if (a2 == 'тс') {
+                        out.push('ツ');
+                        i += 2;
+                    } else if (a2 == 'ту') {
+                        out.push('トゥ');
+                        i += 2;
+                    } else if (a3 == 'тца') {
+                        out.push('ッツァ');
+                        i += 3;
+                    } else if (a3 == 'тце') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a4 == 'тций') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'тци') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'тцо') {
+                        out.push('ツォ');
+                        i += 3;
+                    } else if (a3 == 'тцу') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a4 == 'тцый') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'тцы') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'тць') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'тцэ') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a3 == 'тцю') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a3 == 'тця') {
+                        out.push('ツィア');
+                        i += 3;
+                    } else if (a2 == 'тц') {
+                        out.push('ツ');
+                        i += 2;
+                    } else if (a3 == 'тча') {
+                        out.push('チャ');
+                        i += 3;
+                    } else if (a3 == 'тче') {
+                        out.push('チェ');
+                        i += 3;
+                    } else if (a4 == 'тчий') {
+                        out.push('チ');
+                        i += 4;
+                    } else if (a3 == 'тчи') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a3 == 'тчо') {
+                        out.push('チョ');
+                        i += 3;
+                    } else if (a3 == 'тчу') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a4 == 'тчый') {
+                        out.push('チ');
+                        i += 4;
+                    } else if (a3 == 'тчы') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a3 == 'тчь') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a3 == 'тчэ') {
+                        out.push('チェ');
+                        i += 3;
+                    } else if (a2 == 'тч') {
+                        out.push('チ');
+                        i += 2;
+                    } else if (a3 == 'тый') {
+                        out.push('ティ');
+                        i += 3;
+                    } else if (a2 == 'ты') {
+                        out.push('ティ');
+                        i += 2;
+                    } else if (a2 == 'ть') {
+                        out.push('チ');
+                        i += 2;
+                    } else if (a2 == 'тъ') {
+                        out.push('チ');
+                        i += 2;
+                    } else if (a2 == 'тэ') {
+                        out.push('チェ');
+                        i += 2;
+                    } else if (a2 == 'тю') {
+                        out.push('チュ');
+                        i += 2;
+                    } else if (a2 == 'тя') {
+                        out.push('チャ');
+                        i += 2;
+                    } else if (a2 == 'тё') {
+                        out.push('チョ');
+                        i += 2;
+                    } else if (a2.match(/т[тд]/)) {
+                        out.push('ッ');
+                        i += 1;
+                    } else if (a1 == 'т') {
+                        out.push('ト');
+                        i += 1;
+                    } else if (a1 == 'у') {
+                        out.push('ウ');
+                        i += 1;
+                    } else if (a2 == 'фа') {
+                        out.push('ファ');
+                        i += 2;
+                    } else if (a2 == 'фе') {
+                        out.push('フェ');
+                        i += 2;
+                    } else if (a3 == 'фий') {
+                        out.push('フィ');
+                        i += 3;
+                    } else if (a2 == 'фи') {
+                        out.push('フィ');
+                        i += 2;
+                    } else if (a2 == 'фо') {
+                        out.push('フォ');
+                        i += 2;
+                    } else if (a2 == 'фу') {
+                        out.push('フ');
+                        i += 2;
+                    } else if (a3 == 'фый') {
+                        out.push('フィ');
+                        i += 3;
+                    } else if (a2 == 'фы') {
+                        out.push('フィ');
+                        i += 2;
+                    } else if (a2 == 'фь') {
+                        out.push('フィ');
+                        i += 2;
+                    } else if (a2 == 'фэ') {
+                        out.push('フェ');
+                        i += 2;
+                    } else if (a2 == 'фю') {
+                        out.push('フュ');
+                        i += 2;
+                    } else if (a2 == 'фя') {
+                        out.push('フャ');
+                        i += 2;
+                    } else if (a2 == 'фё') {
+                        out.push('フョ');
+                        i += 2;
+                    } else if (a1 == 'ф') {
+                        out.push('フ');
+                        i += 1;
+                    } else if (a2 == 'ха') {
+                        out.push('ハ');
+                        i += 2;
+                    } else if (a2 == 'хе') {
+                        out.push('ヘ');
+                        i += 2;
+                    } else if (a3 == 'хий') {
+                        out.push('ヒー');
+                        i += 3;
+                    } else if (a2 == 'хи') {
+                        out.push('ヒ');
+                        i += 2;
+                    } else if (a2 == 'хо') {
+                        out.push('ホ');
+                        i += 2;
+                    } else if (a2 == 'ху') {
+                        out.push('フ');
+                        i += 2;
+                    } else if (a3 == 'хый') {
+                        out.push('ヒ');
+                        i += 3;
+                    } else if (a2 == 'хы') {
+                        out.push('ヒ');
+                        i += 2;
+                    } else if (a2 == 'хь') {
+                        out.push('ヒ');
+                        i += 2;
+                    } else if (a2 == 'хэ') {
+                        out.push('ヘ');
+                        i += 2;
+                    } else if (a2 == 'хю') {
+                        out.push('ヒュ');
+                        i += 2;
+                    } else if (a2 == 'хя') {
+                        out.push('ヒャ');
+                        i += 2;
+                    } else if (a1 == 'х') {
+                        out.push('フ');
+                        i += 1;
+                    } else if (a2 == 'ца') {
+                        out.push('ツァ');
+                        i += 2;
+                    } else if (a2 == 'це') {
+                        out.push('ツェ');
+                        i += 2;
+                    } else if (a3 == 'ций') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a2 == 'ци') {
+                        out.push('ツィ');
+                        i += 2;
+                    } else if (a2 == 'цо') {
+                        out.push('ツォ');
+                        i += 2;
+                    } else if (a3 == 'цса') {
+                        out.push('ツァ');
+                        i += 3;
+                    } else if (a3 == 'цсе') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a4 == 'цсий') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'цси') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'цсо') {
+                        out.push('ツォ');
+                        i += 3;
+                    } else if (a3 == 'цсу') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a4 == 'цсый') {
+                        out.push('ツィ');
+                        i += 4;
+                    } else if (a3 == 'цсы') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'цсь') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a3 == 'цсэ') {
+                        out.push('ツェ');
+                        i += 3;
+                    } else if (a3 == 'цсю') {
+                        out.push('チュ');
+                        i += 3;
+                    } else if (a3 == 'цся') {
+                        out.push('ツィア');
+                        i += 3;
+                    } else if (a2 == 'цс') {
+                        out.push('ツ');
+                        i += 2;
+                    } else if (a2 == 'цу') {
+                        out.push('チュ');
+                        i += 2;
+                    } else if (a3 == 'цый') {
+                        out.push('ツィ');
+                        i += 3;
+                    } else if (a2 == 'цы') {
+                        out.push('ツィ');
+                        i += 2;
+                    } else if (a2 == 'ць') {
+                        out.push('ツィ');
+                        i += 2;
+                    } else if (a2 == 'цэ') {
+                        out.push('ツェ');
+                        i += 2;
+                    } else if (a2 == 'цю') {
+                        out.push('チュ');
+                        i += 2;
+                    } else if (a2 == 'ця') {
+                        out.push('ツァ');
+                        i += 2;
+                    } else if (a1 == 'ц') {
+                        out.push('ツ');
+                        i += 1;
+                    } else if (a2 == 'ча') {
+                        out.push('チャ');
+                        i += 2;
+                    } else if (a2 == 'че') {
+                        out.push('チェ');
+                        i += 2;
+                    } else if (a3 == 'чий') {
+                        out.push('チー');
+                        i += 3;
+                    } else if (a2 == 'чи') {
+                        out.push('チ');
+                        i += 2;
+                    } else if (a2 == 'чо') {
+                        out.push('チョ');
+                        i += 2;
+                    } else if (a2 == 'чу') {
+                        out.push('チュ');
+                        i += 2;
+                    } else if (a3 == 'чый') {
+                        out.push('チ');
+                        i += 3;
+                    } else if (a2 == 'чы') {
+                        out.push('チ');
+                        i += 2;
+                    } else if (a2 == 'чь') {
+                        out.push('チ');
+                        i += 2;
+                    } else if (a2 == 'чэ') {
+                        out.push('チェ');
+                        i += 2;
+                    } else if (a2 == 'чё') {
+                        out.push('チョ');
+                        i += 2;
+                    } else if (a1 == 'ч') {
+                        out.push('チ');
+                        i += 1;
+                    } else if (a2 == 'ша') {
+                        out.push('シャ');
+                        i += 2;
+                    } else if (a2 == 'ше') {
+                        out.push('シェ');
+                        i += 2;
+                    } else if (a3 == 'ший') {
+                        out.push('シー');
+                        i += 3;
+                    } else if (a2 == 'ши') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'шо') {
+                        out.push('ショ');
+                        i += 2;
+                    } else if (a2 == 'шу') {
+                        out.push('シュ');
+                        i += 2;
+                    } else if (a3 == 'шый') {
+                        out.push('シ');
+                        i += 3;
+                    } else if (a2 == 'шы') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'шь') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'шэ') {
+                        out.push('シェ');
+                        i += 2;
+                    } else if (a2 == 'шю') {
+                        out.push('シュ');
+                        i += 2;
+                    } else if (a2 == 'шя') {
+                        out.push('シャ');
+                        i += 2;
+                    } else if (a2 == 'шё') {
+                        out.push('ショ');
+                        i += 2;
+                    } else if (a1 == 'ш') {
+                        out.push('シュ');
+                        i += 1;
+                    } else if (a2 == 'ща') {
+                        out.push('シャ');
+                        i += 2;
+                    } else if (a2 == 'ще') {
+                        out.push('シェ');
+                        i += 2;
+                    } else if (a3 == 'щий') {
+                        out.push('シー');
+                        i += 3;
+                    } else if (a2 == 'щи') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'що') {
+                        out.push('ショ');
+                        i += 2;
+                    } else if (a2 == 'щу') {
+                        out.push('シュ');
+                        i += 2;
+                    } else if (a2 == 'щь') {
+                        out.push('シ');
+                        i += 2;
+                    } else if (a2 == 'щю') {
+                        out.push('シュ');
+                        i += 2;
+                    } else if (a2 == 'щё') {
+                        out.push('ショ');
+                        i += 2;
+                    } else if (a1 == 'щ') {
+                        out.push('シ');
+                        i += 1;
+                    } else if (a1 == 'ъ') {
+                        i += 1;
+                    } else if (a2 == 'ый') {
+                        out.push('イ');
+                        i += 2;
+                    } else if (a1 == 'ы') {
+                        out.push('ウィ');
+                        i += 1;
+                    } else if (a1 == 'ь') {
+                        out.push('イ');
+                        i += 1;
+                    } else if (a1 == 'э') {
+                        out.push('エ');
+                        i += 1;
+                    } else if (a1 == 'ю') {
+                        out.push('ユ');
+                        i += 1;
+                    } else if (a1 == 'я') {
+                        out.push('ヤ');
+                        i += 1;
+                    } else if (a1 == 'ё') {
+                        out.push('ョ');
+                        i += 1;
+                    } else {
+                        out.push(a1);
+                        i += 1;
+                    }
+                }
+                return out.join('').normalize('NFC');
+            }
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('btn_convert').addEventListener('click', function () {
+                    document.getElementById('ja').value = ru_ja(document.getElementById('ru').value);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        Enter here russian text and press button:
+        <br>
+        <textarea id="ru" style="height: 40%; width: 100%;"></textarea>
+        <br>
+        <button id="btn_convert">Convert</button>
+        <br>
+        <textarea id="ja" style="height: 40%; width: 100%;"></textarea>
+    </body>
+</html>
