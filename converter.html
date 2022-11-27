@@ -1,0 +1,69 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Converter</title>
+        <script src="dec2uni.js"></script>
+        <script src="uni2dec.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const redraw = () => {
+                    const inputText = document.getElementById('input').value;
+                    let outputText = '';
+                    if (document.getElementById('encode').checked) {
+                        for (c of inputText) {
+                            outputText += uni2dec[c.codePointAt(0)];
+                        }
+                    } else {
+                        let buf2 = '';
+                        for (c of inputText) {
+                            if ('0123456789'.includes(c)) {
+                                buf2 += c;
+                                if (Object.hasOwn(dec2uni, buf2)) {
+                                    const b = dec2uni[buf2];
+                                    if (b < 0x110000) {
+                                        outputText += String.fromCodePoint(b);
+                                    }
+                                    buf2 = '';
+                                }
+                            }
+                        }
+                    }
+                    document.getElementById('output').value = outputText;
+                };
+                document.getElementById('encode').addEventListener('change', () => {
+                    document.getElementById('input').value = document.getElementById('output').value;
+                    redraw();
+                });
+                document.getElementById('decode').addEventListener('change', () => {
+                    document.getElementById('input').value = document.getElementById('output').value;
+                    redraw();
+                });
+                document.getElementById('input').addEventListener('input', redraw);
+            });
+        </script>
+    </head>
+    <body>
+        <fieldset>
+            <legend>Select direction:</legend>
+            <div>
+              <input type="radio" id="encode" name="drone" value="encode"
+                     checked>
+              <label for="encode">Encode</label>
+            </div>
+            <div>
+              <input type="radio" id="decode" name="drone" value="decode">
+              <label for="decode">Decode</label>
+            </div>
+        </fieldset>
+        <div>
+            <label for="input">Input</label>
+            <br>
+            <textarea id="input" cols="80" rows="25"></textarea>
+        </div>
+        <div>
+            <label for="output">Output</label>
+            <br>
+            <textarea id="output" cols="80" rows="25" readonly></textarea>
+        </div>
+    </body>
+</html>
