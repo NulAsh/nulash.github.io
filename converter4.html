@@ -1,0 +1,843 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Converter</title>
+        <style>
+            .hidden {
+                display: none;
+            }
+        </style>
+        <script src="tree.min.js"></script>
+        <script src="sha3.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                let uni2dec = [];
+                let dec2uni = {};
+                const savepath = function (node, path) {
+                    if (typeof node == 'number') {
+                        uni2dec[node] = path;
+                        dec2uni[path] = node;
+                    } else {
+                        for (i in node) {
+                            savepath(node[i], path + i);
+                        }
+                    }
+                };
+                savepath(tree, '');
+                delete tree;
+                const elem_encode = document.getElementById('encode');
+                const elem_decode = document.getElementById('decode');
+                const elem_masklink_checkbox = document.getElementById('masklink_checkbox');
+                const elem_masklink_encode = document.getElementById('masklink_encode');
+                const elem_masklink_inoffensive_link = document.getElementById('masklink_inoffensive_link');
+                const elem_pick_one = document.getElementById('pick_one');
+                const elem_enc_type = document.getElementById('enc_type');
+                const elem_enc_type_digits = document.getElementById('enc_type_digits');
+                const elem_enc_type_base64 = document.getElementById('enc_type_base64');
+                const elem_password = document.getElementById('password');
+                const elem_input = document.getElementById('input');
+                const elem_output = document.getElementById('output');
+                let key;
+                let REVBkey;
+                const M = [[], []];
+                const links = [
+                    'https://www.youtube.com/watch?v=49H_OcW_iNQ',
+                    'http://travel.cnn.com/explorations/eat/worlds-50-most-delicious-foods-067535',
+                    'http://www.bbc.com/culture/story/20141222-who-was-the-mysterious-madame-x',
+                    'https://au.totaltravel.yahoo.com/news/a/25733726/new-seven-wonders-of-the-world/',
+                    'http://sometimesalicefx.deviantart.com/art/the-mask-i-wear-285882466',
+                    'http://www.shell.nl/',
+                    'http://www.philadelphiahistory.org/',
+                    'http://www.randomwebsite.com/'
+                ];
+                let pick_link = (Math.random() * links.length) | 0;
+                const AES_Sbox = new Uint8Array([
+                    99,124,119,123,242,107,111,197,48,1,103,43,254,215,171,118,
+                    202,130,201,125,250,89,71,240,173,212,162,175,156,164,114,
+                    192,183,253,147,38,54,63,247,204,52,165,229,241,113,216,49,
+                    21,4,199,35,195,24,150,5,154,7,18,128,226,235,39,178,117,9,
+                    131,44,26,27,110,90,160,82,59,214,179,41,227,47,132,83,209,
+                    0,237,32,252,177,91,106,203,190,57,74,76,88,207,208,239,
+                    170,251,67,77,51,133,69,249,2,127,80,60,159,168,81,163,64,
+                    143,146,157,56,245,188,182,218,33,16,255,243,210,205,12,19,
+                    236,95,151,68,23,196,167,126,61,100,93,25,115,96,129,79,
+                    220,34,42,144,136,70,238,184,20,222,94,11,219,224,50,58,10,
+                    73,6,36,92,194,211,172,98,145,149,228,121,231,200,55,109,
+                    141,213,78,169,108,86,244,234,101,122,174,8,186,120,37,46,
+                    28,166,180,198,232,221,116,31,75,189,139,138,112,62,181,
+                    102,72,3,246,14,97,53,87,185,134,193,29,158,225,248,152,17,
+                    105,217,142,148,155,30,135,233,206,85,40,223,140,161,137,
+                    13,191,230,66,104,65,153,45,15,176,84,187,22
+                ]);
+                const AES_ShiftRowTab = new Uint8Array([
+                    0,5,10,15,4,9,14,3,8,13,2,7,12,1,6,11
+                ]);
+                const AES_Sbox_Inv = new Uint8Array(256);
+                for (let i = 0; i < 256; i++) {
+                    AES_Sbox_Inv[AES_Sbox[i]] = i;
+                }
+                const AES_ShiftRowTab_Inv = new Uint8Array(16);
+                for (let i = 0; i < 16; i++) {
+                    AES_ShiftRowTab_Inv[AES_ShiftRowTab[i]] = i;
+                }
+                const AES_xtime = new Uint8Array(256);
+                for (let i = 0; i < 128; i++) {
+                    AES_xtime[i] = i << 1;
+                    AES_xtime[128 + i] = (i << 1) ^ 0x1b;
+                }
+                const AES_ExpandKey = () => {
+                    const kl = key.length;
+                    let ks;
+                    let Rcon = 1;
+                    switch (kl) {
+                        case 16:
+                            ks = 16 * (10 + 1);
+                            break;
+                        case 24:
+                            ks = 16 * (12 + 1);
+                            break;
+                        case 32:
+                            ks = 16 * (14 + 1);
+                            break;
+                        default: 
+                            alert('AES_ExpandKey: Only key lengths of 16, 24 or 32 bytes allowed!');
+                    }
+                    const new_key = new Uint8Array(ks);
+                    new_key.set(key);
+                    key = new_key;
+                    for (let i = kl; i < ks; i += 4) {
+                        let temp = key.slice(i - 4, i);
+                        if (i % kl == 0) {
+                            temp = new Uint8Array([
+                                AES_Sbox[temp[1]] ^ Rcon,
+                                AES_Sbox[temp[2]],
+                                AES_Sbox[temp[3]],
+                                AES_Sbox[temp[0]],
+                            ]);
+                            if ((Rcon <<= 1) >= 256) {
+                                Rcon ^= 0x11b;
+                            }
+                        } else if ((kl > 24) && (i % kl == 16)) {
+                            temp = new Uint8Array([
+                                AES_Sbox[temp[0]],
+                                AES_Sbox[temp[1]],
+                                AES_Sbox[temp[2]],
+                                AES_Sbox[temp[3]],
+                            ]);
+                        }
+                        for (let j = 0; j < 4; j++) {
+                            key[i + j] = key[i + j - kl] ^ temp[j];
+                        }
+                    }
+                };
+                const AES_SubBytes = (state, sbox) => {
+                    for (let i = 0; i < 16; i++) {
+                        state[i] = sbox[state[i]];
+                    }
+                };
+                const AES_AddRoundKey = (state, rkey) => {
+                    for (let i = 0; i < 16; i++) {
+                        state[i] ^= rkey[i];
+                    }
+                };
+                const AES_ShiftRows = (state, shifttab) => {
+                    const h = new Uint8Array(state);
+                    for (let i = 0; i < 16; i++) {
+                        state[i] = h[shifttab[i]];
+                    }
+                };
+                const AES_MixColumns = (state) => {
+                    for (let i = 0; i < 16; i += 4) {
+                        const s0 = state[i + 0];
+                        const s1 = state[i + 1];
+                        const s2 = state[i + 2];
+                        const s3 = state[i + 3];
+                        const h = s0 ^ s1 ^ s2 ^ s3;
+                        state[i + 0] ^= h ^ AES_xtime[s0 ^ s1];
+                        state[i + 1] ^= h ^ AES_xtime[s1 ^ s2];
+                        state[i + 2] ^= h ^ AES_xtime[s2 ^ s3];
+                        state[i + 3] ^= h ^ AES_xtime[s3 ^ s0];
+                    }
+                };
+                const AES_MixColumns_Inv = (state) => {
+                    for (let i = 0; i < 16; i += 4) {
+                        const s0 = state[i + 0];
+                        const s1 = state[i + 1];
+                        const s2 = state[i + 2];
+                        const s3 = state[i + 3];
+                        const h = s0 ^ s1 ^ s2 ^ s3;
+                        const xh = AES_xtime[h];
+                        const h1 = AES_xtime[AES_xtime[xh ^ s0 ^ s2]] ^ h;
+                        const h2 = AES_xtime[AES_xtime[xh ^ s1 ^ s3]] ^ h;
+                        state[i + 0] ^= h1 ^ AES_xtime[s0 ^ s1];
+                        state[i + 1] ^= h2 ^ AES_xtime[s1 ^ s2];
+                        state[i + 2] ^= h1 ^ AES_xtime[s2 ^ s3];
+                        state[i + 3] ^= h2 ^ AES_xtime[s3 ^ s0];
+                    }
+                };
+                const AES_Encrypt = (block) => {
+                    const l = key.length;
+                    AES_AddRoundKey(block, key.slice(0, 16));
+                    for (let i = 16; i < l - 16; i += 16) {
+                        AES_SubBytes(block, AES_Sbox);
+                        AES_ShiftRows(block, AES_ShiftRowTab);
+                        AES_MixColumns(block);
+                        AES_AddRoundKey(block, key.slice(i, i + 16));
+                    }
+                    AES_SubBytes(block, AES_Sbox);
+                    AES_ShiftRows(block, AES_ShiftRowTab);
+                    AES_AddRoundKey(block, key.slice(l - 16, l));
+                };
+                const AES_Decrypt = (block) => {
+                    const l = key.length;
+                    AES_AddRoundKey(block, key.slice(l - 16, l));
+                    AES_ShiftRows(block, AES_ShiftRowTab_Inv);
+                    AES_SubBytes(block, AES_Sbox_Inv);
+                    for (let i = l - 32; i >= 16; i -= 16) {
+                        AES_AddRoundKey(block, key.slice(i, i + 16));
+                        AES_MixColumns_Inv(block);
+                        AES_ShiftRows(block, AES_ShiftRowTab_Inv);
+                        AES_SubBytes(block, AES_Sbox_Inv);
+                    }
+                    AES_AddRoundKey(block, key.slice(0, 16));
+                };
+                const simpleEncode = (text) => {
+                    let outputText = '';
+                    for (c of text) {
+                        outputText += uni2dec[c.codePointAt(0)];
+                    }
+                    return outputText;
+                };
+                const simpleDecode = (text) => {
+                    let outputText = '';
+                    let buf2 = '';
+                    for (c of text) {
+                        if ('0123456789'.includes(c)) {
+                            buf2 += c;
+                            if (Object.hasOwn(dec2uni, buf2)) {
+                                const b = dec2uni[buf2];
+                                if (b < 0x110000) {
+                                    outputText += String.fromCodePoint(b);
+                                }
+                                buf2 = '';
+                            }
+                        }
+                    }
+                    return outputText;
+                };
+                const decXor = (a, b) => {  // unused for now
+                    const tbl = [
+                        [0, 1, 2, 4, 3],
+                        [3, 0, 1, 2, 4],
+                        [2, 4, 0, 3, 1],
+                        [1, 3, 4, 0, 2],
+                        [4, 2, 3, 1, 0],
+                    ];
+                    ab = a % 2;
+                    bb = b % 2;
+                    cb = ab ^ bb;
+                    aa = Math.floor(a / 2);
+                    ba = Math.floor(b / 2);
+                    ca = tbl[aa][ba];
+                    return '' + (ca * 2 + cb);
+                };
+                const decStrToUint8 = (a) => {
+                    const dec_str = a.replaceAll(/[^0-9]/g, '');
+                    if (dec_str.length == 0) {
+                        return new Uint8Array();
+                    }
+                    const b = BigInt('1'.repeat(dec_str.length)) + BigInt(dec_str);
+                    let base = 0n;
+                    let old_base;
+                    let len = -1;
+                    while (base <= b) {
+                        old_base = base;
+                        base = (base << 8n) + 1n;
+                        ++len;
+                    }
+                    return new Uint8Array(Array.from((b - old_base).toString(16).padStart(len * 2, '0')).map((e, i, a) => {
+                        if (i & 1) return Number('0x'+a[i-1] + e);
+                    }).filter((e) => e !== undefined));
+                };
+                const uint8ToDecStr = (arr) => {
+                    if (arr.length == 0) {
+                        return '';
+                    }
+                    const b = BigInt('0x0' + '01'.repeat(arr.length)) + arr.reduce((a, c) => (a << 8n) + BigInt(c), 0n);
+                    let base = 0n;
+                    let old_base;
+                    let len = -1;
+                    while (base <= b) {
+                        old_base = base;
+                        base = base * 10n + 1n;
+                        ++len;
+                    }
+                    return (b - old_base).toString().padStart(len, '0');
+                };
+                const base64DecToArr = (sBase64, nBlocksSize) => {
+                    const sB64Enc = sBase64.replace(/[^A-Za-z0-9+/_-]/g, "").replaceAll('-', '+').replaceAll('_', '/');
+                    const nInLen = sB64Enc.length;
+                    const nOutLen = nBlocksSize
+                        ? Math.ceil(((nInLen * 3 + 1) >> 2) / nBlocksSize) * nBlocksSize
+                        : (nInLen * 3 + 1) >> 2;
+                    const taBytes = new Uint8Array(nOutLen);
+                    let nMod3;
+                    let nMod4;
+                    let nUint24 = 0;
+                    let nOutIdx = 0;
+                    for (let nInIdx = 0; nInIdx < nInLen; nInIdx++) {
+                        nMod4 = nInIdx & 3;
+                        const c = sB64Enc.charCodeAt(nInIdx);
+                        nUint24 |= (
+                            c > 64 && c < 91
+                                ? c - 65
+                                : c > 96 && c < 123
+                                    ? c - 71
+                                    : c > 47 && c < 58
+                                        ? c + 4
+                                        : c === 43
+                                            ? 62
+                                            : c === 47
+                                                ? 63
+                                                : 0
+                        ) << (6 * (3 - nMod4));
+                        if (nMod4 === 3 || nInLen - nInIdx === 1) {
+                            nMod3 = 0;
+                            while (nMod3 < 3 && nOutIdx < nOutLen) {
+                                taBytes[nOutIdx] = (nUint24 >>> ((16 >>> nMod3) & 24)) & 255;
+                                nMod3++;
+                                nOutIdx++;
+                            }
+                            nUint24 = 0;
+                        }
+                    }
+                    return taBytes;
+                };
+                const uint6ToB64 = (nUint6, isUrl) => {
+                    return nUint6 < 26
+                        ? nUint6 + 65
+                        : nUint6 < 52
+                            ? nUint6 + 71
+                            : nUint6 < 62
+                                ? nUint6 - 4
+                                : nUint6 === 62
+                                    ? (
+                                        isUrl
+                                            ? 45
+                                            : 43
+                                    )
+                                    : nUint6 === 63
+                                        ? (
+                                            isUrl
+                                            ? 95
+                                            : 47 
+                                        )
+                                        : 65; // A
+                };
+                const base64EncArr = (aBytes, brk, isUrl) => {
+                    let nMod3 = 2;
+                    let sB64Enc = "";
+                    const nLen = aBytes.length;
+                    let nUint24 = 0;
+                    for (let nIdx = 0; nIdx < nLen; nIdx++) {
+                        nMod3 = nIdx % 3;
+                        if (brk && nIdx > 0 && ((nIdx * 4) / 3) % 76 === 0) {
+                            sB64Enc += "\r\n";
+                        }
+                        nUint24 |= aBytes[nIdx] << ((16 >>> nMod3) & 24);
+                        if (nMod3 === 2 || aBytes.length - nIdx === 1) {
+                            sB64Enc += String.fromCodePoint(
+                                uint6ToB64((nUint24 >>> 18) & 63, isUrl),
+                                uint6ToB64((nUint24 >>> 12) & 63, isUrl),
+                                uint6ToB64((nUint24 >>> 6) & 63, isUrl),
+                                uint6ToB64(nUint24 & 63, isUrl)
+                            );
+                            nUint24 = 0;
+                        }
+                    }
+                    return (
+                        sB64Enc.substring(0, sB64Enc.length - 2 + nMod3) +
+                        (nMod3 === 2 ? "" : nMod3 === 1 ? "=" : "==")
+                    );
+                }
+                const EPBC_g = (block) => {
+                    const G = new BigUint64Array(block.buffer);
+                    return new Uint8Array(new BigUint64Array([G[0] | ~G[1], G[0] & ~G[1]]).buffer);
+                };
+                const EPBC_step_encrypt = (state, P) => {
+                    const G = new Uint8Array(16);
+                    for (let i = 0; i < 16; ++i) {
+                        G[i] = state[0][i] ^ P[i];
+                    }
+                    const F = new Uint8Array(G);
+                    AES_Encrypt(F);
+                    const g = EPBC_g(state[1]);
+                    const C = new Uint8Array(16);
+                    for (let i = 0; i < 16; ++i) {
+                        C[i] = F[i] ^ g[i];
+                    }
+                    state[0] = F;
+                    state[1] = G;
+                    return C;
+                };
+                const EPBC_step_decrypt = (state, C) => {
+                    const g = EPBC_g(state[1]);
+                    const F = new Uint8Array(16);
+                    for (let i = 0; i < 16; ++i) {
+                        F[i] = C[i] ^ g[i];
+                    }
+                    const G = new Uint8Array(F);
+                    AES_Decrypt(G);
+                    const P = new Uint8Array(16);
+                    for (let i = 0; i < 16; ++i) {
+                        P[i] = G[i] ^ state[0][i];
+                    }
+                    state[0] = F;
+                    state[1] = G;
+                    return P;
+                };
+                const EPBC_encrypt_normal_once = (plaintext, IV) => {
+                    const state = [new Uint8Array(IV[0]), new Uint8Array(IV[1])];
+                    const l = plaintext.length;
+                    const ciphertext = new Uint8Array(l);
+                    for (let i = 0; i < l; i += 16) {
+                        ciphertext.set(EPBC_step_encrypt(state, plaintext.subarray(i, i + 16)), i);
+                    }
+                    return ciphertext;
+                };
+                const EPBC_decrypt_normal_once = (ciphertext, IV) => {
+                    const state = [new Uint8Array(IV[0]), new Uint8Array(IV[1])];
+                    const l = ciphertext.length;
+                    const plaintext = new Uint8Array(l);
+                    for (let i = 0; i < l; i += 16) {
+                        plaintext.set(EPBC_step_decrypt(state, ciphertext.subarray(i, i + 16)), i);
+                    }
+                    return plaintext;
+                };
+                const EPBC_encrypt_CTS_once = (plaintext, IV) => {
+                    const state = [new Uint8Array(IV[0]), new Uint8Array(IV[1])];
+                    const l = plaintext.length - 32;
+                    const ciphertext = new Uint8Array(l + 32);
+                    for (let i = 0; i < l; i += 16) {
+                        ciphertext.set(EPBC_step_encrypt(state, plaintext.subarray(i, i + 16)), i);
+                    }
+                    const c1_pos = (l >> 4 << 4) + 16;
+                    const c2_pos = c1_pos + 16;
+                    const C2 = EPBC_step_encrypt(state, plaintext.subarray(c1_pos, c2_pos)).slice(0, l & 15);
+                    const P2 = new Uint8Array(16);
+                    P2.set(plaintext.subarray(c2_pos, c2_pos + (l & 15)));
+
+                    const G = new Uint8Array(16);
+                    for (let i = 0; i < 16; ++i) {
+                        G[i] = state[0][i] ^ P2[i];
+                    }
+                    const C1 = new Uint8Array(G);
+                    AES_Encrypt(C1);
+                    
+                    ciphertext.set(C1, c1_pos);
+                    ciphertext.set(C2, c2_pos);
+                    return ciphertext;
+                };
+                const EPBC_decrypt_CTS_once = (ciphertext, IV) => {
+                    const state = [new Uint8Array(IV[0]), new Uint8Array(IV[1])];
+                    const l = ciphertext.length - 32;
+                    const plaintext = new Uint8Array(l + 32);
+                    for (let i = 0; i < l; i += 16) {
+                        plaintext.set(EPBC_step_decrypt(state, ciphertext.subarray(i, i + 16)), i);
+                    }
+                    const p1_pos = (l >> 4 << 4) + 16;
+                    const p2_pos = p1_pos + 16;
+
+                    const C1 = ciphertext.slice(p1_pos, p2_pos);
+                    const C2 = ciphertext.slice(p2_pos, p2_pos + (l & 15));
+                    AES_Decrypt(C1);
+                    const P1 = new Uint8Array(16);
+                    const P2 = C1.slice(0, l & 15);
+                    const stolen = C1.slice(l & 15);
+                    const F1 = new Uint8Array(16);
+                    const g = EPBC_g(state[1]);
+                    for (let i = 0; i < (l & 15); ++i) {
+                        F1[i] = C2[i] ^ g[i];
+                        P2[i] ^= F1[i];
+                    }
+                    for (let i = l & 15; i < 16; ++i) {
+                        F1[i] = stolen[i - (l & 15)];
+                    }
+                    AES_Decrypt(F1);
+                    for (let i = 0; i < 16; ++i) {
+                        P1[i] = F1[i] ^ state[0][i];
+                    }
+                    plaintext.set(P1, p1_pos);
+                    plaintext.set(P2, p2_pos);
+                    return plaintext;
+                };
+                const FF31_NUM256 = (X) => {
+                    let x = 0n;
+                    for (let i = 0; i < X.length; ++i) {
+                        x = (x << 8n) + BigInt(X[i]);
+                    }
+                    return x;
+                };
+                // NUM(X) is the same
+                const FF31_STR256 = (x, m) => {
+                    const X = new Uint8Array(m);
+                    for (let i = 0; i < m; ++i) {
+                        X[m-1-i] = Number(x & 255n);
+                        x = x >> 8n;
+                    }
+                    return X;
+                };
+                const FF31_REV = (X) => {
+                    const l = X.length;
+                    const Y = new Uint8Array(l);
+                    for (let i = 0; i < l; ++i) {
+                        Y[i] = X[l-1-i];
+                    }
+                    return Y;
+                };
+                // REVB (X) is the same
+                const FF31_PRF = (X) => {
+                    const l = X.length;
+                    const Y = new Uint8Array(16);
+                    for (let i = 0; i < l; i += 16) {
+                        for (let j = 0; j < 16; ++j) {
+                            Y[j] ^= X[i + j];
+                        }
+                        AES_Encrypt(Y);
+                    }
+                    return Y;
+                };
+                const FF31_TL = (T) => {
+                    const TL = new Uint8Array(4);
+                    TL[0] = T[0];
+                    TL[1] = T[1];
+                    TL[2] = T[2];
+                    TL[3] = T[3] & 0xf0;
+                    return TL;
+                };
+                const FF31_TR = (T) => {
+                    const TR = new Uint8Array(4);
+                    TR[0] = T[4];
+                    TR[1] = T[5];
+                    TR[2] = T[6];
+                    TR[3] = (T[3] & 0x0f) << 4;
+                    return TR;
+                };
+                const FF31_Encrypt = (T, X) => {
+                    const n = X.length;
+                    const u = Math.ceil(n / 2);
+                    const v = n - u;
+                    let A = X.subarray(0, u);
+                    let B = X.subarray(u, n);
+                    const TL = FF31_TL(T);
+                    const TR = FF31_TR(T);
+                    for (let i = 0; i < 8; ++i) {
+                        let m;
+                        let W; // 4 bytes
+                        if (i & 1) {
+                            m = v;
+                            W = TL;
+                        } else {
+                            m = u;
+                            W = TR;
+                        }
+                        const P = new Uint8Array(16);
+                        for (let j = 0; j < 4; ++j) {
+                            P[j] = W[j] ^ ((i >> ((3 - j) << 3)) & 255);
+                        }
+                        P.set(FF31_STR256(FF31_NUM256(FF31_REV(B)), 12), 4);
+                        let S = FF31_REV(P);
+                        let temp = key;
+                        key = REVBkey;
+                        AES_Encrypt(S);
+                        key = temp;
+                        S = FF31_REV(S);
+                        const y = FF31_NUM256(S);
+                        const c = (FF31_NUM256(FF31_REV(A)) + y) & ((1n << BigInt(m) * 8n) - 1n);
+                        const C = FF31_REV(FF31_STR256(c, m));
+                        A = B;
+                        B = C;
+                    }
+                    const Y = new Uint8Array(n);
+                    Y.set(A);
+                    Y.set(B, A.length);
+                    return Y;
+                };
+                const FF31_Decrypt = (T, X) => {
+                    const n = X.length;
+                    const u = Math.ceil(n / 2);
+                    const v = n - u;
+                    let A = X.subarray(0, u);
+                    let B = X.subarray(u, n);
+                    const TL = FF31_TL(T);
+                    const TR = FF31_TR(T);
+                    for (let i = 7; i >= 0; --i) {
+                        let m;
+                        let W; // 4 bytes
+                        if (i & 1) {
+                            m = v;
+                            W = TL;
+                        } else {
+                            m = u;
+                            W = TR;
+                        }
+                        const P = new Uint8Array(16);
+                        for (let j = 0; j < 4; ++j) {
+                            P[j] = W[j] ^ ((i >> ((3 - j) << 3)) & 255);
+                        }
+                        P.set(FF31_STR256(FF31_NUM256(FF31_REV(A)), 12), 4);
+                        let S = FF31_REV(P);
+                        let temp = key;
+                        key = REVBkey;
+                        AES_Encrypt(S);
+                        key = temp;
+                        S = FF31_REV(S);
+                        const y = FF31_NUM256(S);
+                        const c = (FF31_NUM256(FF31_REV(B)) - y) & ((1n << BigInt(m) * 8n) - 1n);
+                        const C = FF31_REV(FF31_STR256(c, m));
+                        B = A;
+                        A = C;
+                    }
+                    const Y = new Uint8Array(n);
+                    Y.set(A);
+                    Y.set(B, A.length);
+                    return Y;
+                };
+                const populateM = (index) => {
+                    el = [[256, 2], [65536, 4]][index];
+                    const l = el[0];
+                    for (let i = 0; i < l; ++ i) {
+                        const block = new Uint8Array(Array.from(i.toString(16).padStart(32, '0')).map((e, i, a) => {
+                            if (i & 1) return Number('0x'+a[i-1] + e);
+                        }).filter((e) => e !== undefined));
+                        AES_Encrypt(block);
+                        M[index].push([i.toString(16).padStart(el[1], '0'), Array.from(block).map((e) => e.toString(16).padStart(2, '0')).join('')]);
+                    }
+                    M[index].sort((a, b) => {
+                        if (a[1] < b[1]) {
+                            return -1;
+                        }
+                        if (a[1] > b[1]) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                };
+                const complexEncode = (plaintext) => {
+                    if (plaintext.length == 0) {
+                        return new Uint8Array();
+                    }
+                    if ((plaintext.length == 1) || (plaintext.length == 2)) {
+                        if (M[plaintext.length - 1].length == 0) {
+                            populateM(plaintext.length - 1);
+                        }
+                        return new Uint8Array(Array.from(M[plaintext.length - 1][Number('0x' + Array.from(plaintext).map((e) => e.toString(16).padStart(2, '0')).join(''))][0]).map((e, i, a) => {
+                            if (i & 1) return Number('0x'+a[i-1] + e);
+                        }).filter((e) => e !== undefined));
+                    }
+                    if (plaintext.length == 16) {
+                        const tmp = new Uint8Array(plaintext);
+                        AES_Encrypt(tmp);
+                        return tmp;
+                    }
+                    const iv = shake_256.array(plaintext.length.toString(), 256);
+                    if (plaintext.length < 16) {
+                        //FF3-1
+                        tweak = iv.slice(0, 7);
+                        return FF31_Encrypt(tweak, plaintext);
+                    }
+                    const IV = [new Uint8Array(iv.slice(0, 16)), new Uint8Array(iv.slice(16, 32))];
+                    if (plaintext.length & 15) {
+                        // modified EPBC in two directions
+                        return EPBC_encrypt_CTS_once(EPBC_encrypt_CTS_once(plaintext, IV).reverse(), IV);
+                    } else {
+                        // EPBC in two directions
+                        return EPBC_encrypt_normal_once(EPBC_encrypt_normal_once(plaintext, IV).reverse(), IV);
+                    }
+                };
+                const complexDecode = (ciphertext) => {
+                    if (ciphertext.length == 0) {
+                        return new Uint8Array();
+                    }
+                    if ((ciphertext.length == 1) || (ciphertext.length == 2)) {
+                        if (M[ciphertext.length - 1].length == 0) {
+                            populateM(ciphertext.length - 1);
+                        }
+                        return new Uint8Array(
+                            Array.from(
+                                M[ciphertext.length - 1].findIndex((e) => e[0] == Array.from(ciphertext).map((e) => e.toString(16).padStart(2, '0')).join(''))
+                                .toString(16).padStart(ciphertext.length * 2, '0')
+                            )
+                            .map((e, i, a) => {
+                                if (i & 1) return Number('0x'+a[i-1] + e);
+                            })
+                            .filter((e) => e !== undefined)
+                        );
+                    }
+                    if (ciphertext.length == 16) {
+                        const tmp = new Uint8Array(ciphertext);
+                        AES_Decrypt(tmp);
+                        return tmp;
+                    }
+                    const iv = shake_256.array(ciphertext.length.toString(), 256);
+                    if (ciphertext.length < 16) {
+                        //FF3-1
+                        tweak = iv.slice(0, 7);
+                        return FF31_Decrypt(tweak, ciphertext);
+                    }
+                    const IV = [new Uint8Array(iv.slice(0, 16)), new Uint8Array(iv.slice(16, 32))];
+                    if (ciphertext.length & 15) {
+                        // modified EPBC in two directions
+                        return EPBC_decrypt_CTS_once(EPBC_decrypt_CTS_once(ciphertext, IV).reverse(), IV);
+                    } else {
+                        // EPBC in two directions
+                        return EPBC_decrypt_normal_once(EPBC_decrypt_normal_once(ciphertext, IV).reverse(), IV);
+                    }
+                };
+                const masklink_prepare_url = (url, is_digits) => {
+                    return url + (url.indexOf('?') === -1 ? '?' : '&') + 'qtxrt_cu=' + ((Math.random() * 50 << 2) + is_digits) + '&mskl_=';
+                };
+                const redraw = (e) => {
+                    const inputText = elem_input.value;
+                    const passwordText = elem_password.value;
+                    let outputText = '';
+                    if (passwordText && (e.target.id == 'password')) {
+                        key = sha3_256.array(passwordText);
+                        REVBkey = FF31_REV(key);
+                        AES_ExpandKey();
+                        let temp = key;
+                        key = REVBkey;
+                        AES_ExpandKey();
+                        REVBkey = key;
+                        key = temp;
+                        M[0] = [];
+                        M[1] = [];
+                    }
+                    if (elem_encode.checked) {
+                        let encoded;
+                        if (passwordText) {
+                            const binary = complexEncode(decStrToUint8(simpleEncode(inputText)));
+                            encoded = elem_enc_type_digits.checked
+                                ? uint8ToDecStr(binary)
+                                : elem_masklink_checkbox.checked
+                                    ? base64EncArr(binary, false, true)
+                                    : base64EncArr(binary, true, false);
+                        } else {
+                            encoded = elem_enc_type_digits.checked
+                                ? simpleEncode(inputText)
+                                : elem_masklink_checkbox.checked
+                                    ? base64EncArr(decStrToUint8(simpleEncode(inputText)), false, true)
+                                    : base64EncArr(decStrToUint8(simpleEncode(inputText)), true, false);
+                        }
+                        elem_output.value = elem_masklink_checkbox.checked
+                            ? masklink_prepare_url(elem_masklink_inoffensive_link.value, elem_enc_type_digits.checked) + encoded
+                            : encoded;
+                    } else {
+                        let encoded;
+                        let is_digits;
+                        if (elem_masklink_checkbox.checked) {
+                            const pos_q = inputText.lastIndexOf('qtxrt_cu=');
+                            const pos_m = inputText.lastIndexOf('&mskl_=');
+                            is_digits = Number(inputText.slice(pos_q + 9, pos_m)) & 1;
+                            encoded = inputText.slice(pos_m + 7);
+                        } else {
+                            is_digits = elem_enc_type_digits.checked;
+                            encoded = inputText;
+                        }
+                        elem_output.value = simpleDecode(
+                            is_digits && !passwordText
+                                ? encoded
+                                : uint8ToDecStr(
+                                    passwordText
+                                        ? complexDecode(
+                                            is_digits
+                                                ? decStrToUint8(encoded)
+                                                : base64DecToArr(encoded)
+                                        )
+                                        : base64DecToArr(encoded)
+                                )
+                        );
+                    }
+                };
+                const masklink_check_handler = (e) => {
+                    elem_masklink_encode.className = (elem_masklink_checkbox.checked && elem_encode.checked)
+                        ? ''
+                        : 'hidden';
+                    elem_enc_type.className = (elem_masklink_checkbox.checked && elem_decode.checked)
+                        ? 'hidden'
+                        : '';
+                    redraw(e);
+                };
+                const change_encode_handler = (e) => {
+                    elem_input.value = elem_output.value;
+                    masklink_check_handler(e);
+                };
+                elem_encode.addEventListener('change', change_encode_handler);
+                elem_decode.addEventListener('change', change_encode_handler);
+                elem_input.addEventListener('input', redraw);
+                elem_password.addEventListener('input', redraw);
+                elem_masklink_checkbox.addEventListener('input', masklink_check_handler);
+                elem_masklink_inoffensive_link.addEventListener('input', redraw);
+                elem_pick_one.addEventListener('click', (e) => {
+                    pick_link += 1;
+                    elem_masklink_inoffensive_link.value = links[pick_link % links.length];
+                    redraw(e);
+                });
+                enc_type_digits.addEventListener('change', redraw);
+                enc_type_base64.addEventListener('change', redraw);
+            });
+        </script>
+    </head>
+    <body>
+        <fieldset>
+            <legend>Select direction:</legend>
+            <div>
+              <input type="radio" id="encode" name="field1" value="encode"
+                     checked>
+              <label for="encode">Encode</label>
+            </div>
+            <div>
+              <input type="radio" id="decode" name="field1" value="decode">
+              <label for="decode">Decode</label>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Masklink imitation:</legend>
+            <div>
+                <input type="checkbox" id="masklink_checkbox">
+                <label for="masklink_checkbox">Simulate Masklink</label>
+            </div>
+            <div id="masklink_encode" class="hidden">
+                <label for="masklink_inoffensive_link">Inoffensive link:</label>
+                <input type="text" id="masklink_inoffensive_link">
+                <button id="pick_one">Pick one for me</button>
+            </div>
+        </fieldset>
+        <fieldset id="enc_type">
+            <legend>Select encoding type:</legend>
+            <div>
+              <input type="radio" id="enc_type_digits" name="field2" value="digits"
+                     checked>
+              <label for="enc_type_digits">Decimal digits</label>
+            </div>
+            <div>
+              <input type="radio" id="enc_type_base64" name="field2" value="base64">
+              <label for="enc_type_base64">Base64</label>
+            </div>
+        </fieldset>
+        <div>
+            <label for="password">Password:</label>
+            <input type="text" id="password">
+        </div>
+        <div>
+            <label for="input">Input</label>
+            <br>
+            <textarea id="input" cols="80" rows="25"></textarea>
+        </div>
+        <div>
+            <label for="output">Output</label>
+            <br>
+            <textarea id="output" cols="80" rows="25" readonly></textarea>
+        </div>
+    </body>
+</html>
